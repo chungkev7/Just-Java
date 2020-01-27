@@ -1,5 +1,7 @@
 package com.example.android.justjava;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -8,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 /**
  * This app displays an order form to order coffee.
@@ -36,7 +39,10 @@ public class MainActivity extends AppCompatActivity {
     public void decrement(View view) {
         if (quantity != 0) {
             quantity -= 1;
+        } else {
+            Toast.makeText(this, "You cannot order a negative amount of coffee", Toast.LENGTH_SHORT).show();
         }
+
         displayQuantity(quantity);
     }
 
@@ -52,18 +58,40 @@ public class MainActivity extends AppCompatActivity {
         CheckBox chocolateCheckBox = (CheckBox) findViewById(R.id.chocolate_checkbox);
         boolean hasChocolate = chocolateCheckBox.isChecked();
 
-        int price = calculatePrice();
-        displayMessage(createOrderSummary(userName, price, hasWhippedCream, hasChocolate));
+        int price = calculatePrice(hasWhippedCream, hasChocolate);
+        String priceMessage = createOrderSummary(userName, price, hasWhippedCream, hasChocolate);
+
+        displayMessage(priceMessage);
+
+        // This intent object sends the order to an email app
+        Intent intent = new Intent(Intent.ACTION_SENDTO);
+        intent.setData(Uri.parse("mailto:"));
+        intent.putExtra(Intent.EXTRA_SUBJECT, "Just Java order for " + name);
+        intent.putExtra(Intent.EXTRA_TEXT, priceMessage);
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            startActivity(intent);
+        }
     }
 
     /**
      * Calculates the price of the order
      *
+     * @param hasWhippedCream is whether or not the user wants whipped cream as a topping
+     * @param hasChocolate is whether or not the user wants chocolate as a topping
      * @return total price
      */
-    private int calculatePrice(){
-        int price = quantity * 5;
-        return price;
+    private int calculatePrice(boolean hasWhippedCream, boolean hasChocolate){
+        int basePrice = 5;
+
+        if(hasWhippedCream) {
+            basePrice += 1;
+        }
+
+        if (hasChocolate) {
+            basePrice += 2;
+        }
+
+        return quantity * basePrice;
     }
 
     /**
@@ -82,8 +110,8 @@ public class MainActivity extends AppCompatActivity {
         priceMessage += "\n\nQuantity: " + quantity;
         priceMessage += "\n\nTotal: $" + price;
         priceMessage += "\n\nThank you!";
-        return priceMessage;
 
+        return priceMessage;
     }
 
     /**
