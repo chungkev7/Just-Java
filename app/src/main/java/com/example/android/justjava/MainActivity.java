@@ -1,8 +1,12 @@
 package com.example.android.justjava;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import androidx.appcompat.app.AppCompatActivity;
+
+import android.widget.CheckBox;
+import android.widget.EditText;
 import android.widget.TextView;
 
 /**
@@ -40,8 +44,16 @@ public class MainActivity extends AppCompatActivity {
      * This method is called when the order button is clicked.
      */
     public void submitOrder(View view) {
+        EditText name = (EditText) findViewById(R.id.name_field);
+        String userName = name.getText().toString();
+
+        CheckBox whippedCreamCheckBox = (CheckBox) findViewById(R.id.whipped_cream_checkbox);
+        boolean hasWhippedCream = whippedCreamCheckBox.isChecked();
+        CheckBox chocolateCheckBox = (CheckBox) findViewById(R.id.chocolate_checkbox);
+        boolean hasChocolate = chocolateCheckBox.isChecked();
+
         int price = calculatePrice();
-        displayMessage(createOrderSummary(price));
+        displayMessage(createOrderSummary(userName, price, hasWhippedCream, hasChocolate));
     }
 
     /**
@@ -57,11 +69,16 @@ public class MainActivity extends AppCompatActivity {
     /**
      * Create a summary of the order
      *
+     * @param userName is the name the user entered
+     * @param hasWhippedCream is whether or not the user wants whipped cream topping
+     * @param hasChocolate is whether or not the user wants chocolate topping
      * @param price of the order
      * @return text summary
      */
-    private String createOrderSummary(int price) {
-        String priceMessage = "Name:";
+    private String createOrderSummary(String userName, int price, boolean hasWhippedCream, boolean hasChocolate) {
+        String priceMessage = "Name: " + userName;
+        priceMessage += "\n\nWhipped cream added? " + hasWhippedCream;
+        priceMessage += "\n\nChocolate added? " + hasChocolate;
         priceMessage += "\n\nQuantity: " + quantity;
         priceMessage += "\n\nTotal: $" + price;
         priceMessage += "\n\nThank you!";
